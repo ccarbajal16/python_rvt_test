@@ -83,3 +83,51 @@ msrm_arr = rvt.vis.msrm(dem=dem_arr, resolution=dem_res_x, feature_min=feature_m
 msrm_path = r"outputs/hh_test_relieve_multiescala.tif"
 rvt.default.save_raster(src_raster_path=dem_path, out_raster_path=msrm_path, 
                         out_raster_arr=msrm_arr, no_data=np.nan, e_type=6)
+
+# Parámetros del factor de vista del cielo (svf) que también se aplica para svf anisotrópico (asvf) y apertura (opns)
+svf_n_dir = 16  # número de direcciones
+svf_r_max = 10  # radio de búsqueda máximo en píxeles
+# nivel de eliminación de ruido (0-no eliminar, 1-bajo, 2-medio, 3-alto)
+svf_noise = 0
+# Parámetros del svf anisotrópico
+asvf_level = 1  # nivel de anisotropía (1-bajo, 2-alto)
+asvf_dir = 315  # dirección de anisotropía en grados
+
+# Genera un diccionario con claves 'svf', 'asvf' y 'opns'
+dict_svf = rvt.vis.sky_view_factor(dem=dem_arr, resolution=dem_res_x, compute_svf=True,
+                                   compute_asvf=True, compute_opns=True, svf_n_dir=svf_n_dir,
+                                   svf_r_max=svf_r_max, svf_noise=svf_noise, asvf_level=asvf_level, asvf_dir=asvf_dir, no_data=dem_no_data, fill_no_data=False,
+                                   keep_original_no_data=False)
+
+svf_arr = dict_svf["svf"]  # factor de vista del cielo
+asvf_arr = dict_svf["asvf"]  # factor de vista del cielo anisotrópico
+opns_arr = dict_svf["opns"]  # apertura positiva
+
+# Guarda los resultados para svf, asvf y opns
+svf_path = r"outputs/hh_test_svf.tif"
+rvt.default.save_raster(src_raster_path=dem_path, out_raster_path=svf_path,
+                        out_raster_arr=svf_arr, no_data=np.nan, e_type=6)
+
+asvf_path = r"outputs/hh_test_asvf.tif"
+rvt.default.save_raster(src_raster_path=dem_path, out_raster_path=asvf_path,
+                        out_raster_arr=asvf_arr, no_data=np.nan, e_type=6)
+
+opns_path = r"outputs/hh_test_pos_opns.tif"
+rvt.default.save_raster(src_raster_path=dem_path, out_raster_path=opns_path,
+                        out_raster_arr=opns_arr, no_data=np.nan, e_type=6)
+
+# Para la Apertura Negativa (neg-opns)
+dem_arr_neg_opns = dem_arr * -1  # nuestro dem * -1
+# No necesitamos calcular svf y asvf (compute_svf = False, compute_asvf = False)
+dict_svf2 = rvt.vis.sky_view_factor(dem=dem_arr_neg_opns, resolution=dem_res_x,
+                                    compute_svf=False, compute_asvf=False,
+                                    compute_opns=True, svf_n_dir=svf_n_dir,
+                                    svf_r_max=svf_r_max, svf_noise=svf_noise,
+                                    no_data=dem_no_data, fill_no_data=False,
+                                    keep_original_no_data=False)
+neg_opns_arr = dict_svf2["opns"]
+
+# Guarda los resultados
+neg_opns_path = r"outputs/hh_test_neg_opns.tif"
+rvt.default.save_raster(src_raster_path=dem_path, out_raster_path=neg_opns_path,
+                        out_raster_arr=neg_opns_arr, no_data=np.nan, e_type=6)
