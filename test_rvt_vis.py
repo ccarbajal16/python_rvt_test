@@ -131,3 +131,38 @@ neg_opns_arr = dict_svf2["opns"]
 neg_opns_path = r"outputs/hh_test_neg_opns.tif"
 rvt.default.save_raster(src_raster_path=dem_path, out_raster_path=neg_opns_path,
                         out_raster_arr=neg_opns_arr, no_data=np.nan, e_type=6)
+
+# Parámetros de Dominancia Local
+min_rad = 10  # mínima distancia radial
+max_rad = 20  # máxima distancia radial
+rad_inc = 1  # pasos de distancia radial en píxeles
+angular_res = 15  # paso angular para determinar el número de direcciones angulares
+observer_height = 1.7  # altura a la que observamos el terreno
+local_dom_arr = rvt.vis.local_dominance(dem=dem_arr, min_rad=min_rad, max_rad=max_rad,
+                                        rad_inc=rad_inc, angular_res=angular_res,
+                                        observer_height=observer_height, ve_factor=1,
+                                        no_data=dem_no_data, fill_no_data=False,
+                                        keep_original_no_data=False)
+
+# Guarda los resultados
+local_dom_path = r"outputs/hh_test_dominancia_local.tif"
+rvt.default.save_raster(src_raster_path=dem_path, out_raster_path=local_dom_path,
+                        out_raster_arr=local_dom_arr, no_data=np.nan, e_type=6)
+
+# Parámetros de iluminación de cielo
+sky_model = "overcast"  # modelo de cielo nublado, puede ser también "uniform"
+max_fine_radius = 100  # distancia máxima de modelado de sombras en píxeles
+num_directions = 32  # direcciones para buscar horizonte
+compute_shadow = True  # si es True, agrega sombreado
+shadow_az = 315  # azimut de sombra
+shadow_el = 35  # elevación de sombra
+sky_illum_arr = rvt.vis.sky_illumination(dem=dem_arr, resolution=dem_res_x,
+                                         sky_model=sky_model, max_fine_radius=max_fine_radius,
+                                         num_directions=num_directions, shadow_az=shadow_az,
+                                         shadow_el=shadow_el, ve_factor=1, no_data=dem_no_data,
+                                         fill_no_data=False, keep_original_no_data=False)
+
+# Guarda los resultados
+sky_illum_path = r"outputs/hh_test_ilumina_cielo.tif"
+rvt.default.save_raster(src_raster_path=dem_path, out_raster_path=sky_illum_path,
+                        out_raster_arr=sky_illum_arr, no_data=np.nan, e_type=6)
